@@ -18,6 +18,13 @@ function Game() {
   this.gameOn = false;
 }
 
+Game.prototype.uniqueId = function () {
+  return (
+    Date().slice(0, 24).replaceAll(":", "").replaceAll(" ", "") +
+    Math.random().toString().replace(".", "")
+  );
+};
+
 Game.prototype.startGame = function () {
   this.addPlayer();
   this.addEnemy(3);
@@ -37,7 +44,7 @@ Game.prototype.runLoop = function (keyInput) {
 
 Game.prototype.addPlayer = function () {
   if (!this.entities.includes(this.getPlayer())) {
-    this.entities.push(new Soldier(2, 2, "soldier"));
+    this.entities.push(new Soldier(2, 2, "soldier", this.uniqueId()));
   }
 };
 
@@ -47,16 +54,16 @@ Game.prototype.getPlayer = function () {
 
 Game.prototype.addEnemy = function (num) {
   for (let index = 0; index < num; index++) {
-    this.entities.push(new Zombie(4 + index, 8, "zombie"));
+    this.entities.push(new Zombie(4 + index, 8, "zombie", this.uniqueId()));
   }
 };
 
 Game.prototype.overlap = function () {
   let mapMatrix = [];
   let b = [];
-  for (let i = 1; i < map.x; i++) {
+  for (let i = 1; i < gameMap.x; i++) {
     b = [];
-    for (let j = 1; j < map.y; j++) {
+    for (let j = 1; j < gameMap.y; j++) {
       b.push([getCellClass(i, j)]);
     }
     mapMatrix.push(b);
@@ -69,10 +76,11 @@ Game.prototype.overlap = function () {
 
 //OBJETO
 
-function Pawn(x, y, type) {
+function Pawn(x, y, type, id) {
   this.x = x;
   this.y = y;
   this.type = type;
+  this.id = id;
   this.canMove = {
     up: true,
     left: true,
@@ -136,8 +144,8 @@ Pawn.prototype.canGo = function () {
 };
 
 // Soldado
-function Soldier(x, y, type) {
-  Pawn.call(this, x, y, type);
+function Soldier(x, y, type, id) {
+  Pawn.call(this, x, y, type, id);
   this.blockedTerrain = ["wall", "zombie"];
 }
 Soldier.prototype = Object.create(Pawn.prototype);
@@ -158,8 +166,8 @@ Soldier.prototype.move = function (keyInput) {
 };
 
 // ZOMBIE
-function Zombie(x, y, type) {
-  Pawn.call(this, x, y, type);
+function Zombie(x, y, type, id) {
+  Pawn.call(this, x, y, type, id);
   this.go = true;
   this.blockedTerrain = ["zombie", "wall"];
   this.target = ["soldier"];
