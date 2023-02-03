@@ -1,0 +1,60 @@
+:root {
+  --negro: #1a1417;
+  --gris: #7c8381;
+  --blanco: #d9cbae;
+  --marron: #67413a;
+  --verde: #8db35e;
+  --acento1: #af4b3b;
+  --acento3: #c18549;
+  --acento2: #384d64;
+}
+body {
+  background-color: var(--negro);
+  color: var(--blanco);
+  text-align: center;
+}
+
+table {
+  margin: auto;
+  border-collapse: collapse;
+  background-color: var(--marron);
+}
+
+td {
+  width: 40px;
+  height: 40px;
+}
+tr {
+  background-image: url("../assests/images/floor.png");
+  background-size: contain;
+  background-blend-mode: hard-light;
+  background-color: var(--marron);
+}
+
+h1 {
+  font-size: large;
+}
+
+.soldier {
+  background-image: url("../assests/images/soldier.png");
+  background-size: contain;
+  background-color: var(--acento2);
+  border-radius: 100%;
+}
+
+.zombie {
+  background-image: url("../assests/images/zombie.png");
+  background-size: contain;
+  background-color: var(--verde);
+  border-radius: 100%;
+}
+
+.dummy {
+  background-color: var(--acento3);
+}
+
+.wall {
+  background-image: url("../assests/images/wall.png");
+  background-size: contain;
+  background-color: var(--gris);
+}
