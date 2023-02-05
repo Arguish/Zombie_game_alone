@@ -88,17 +88,59 @@ Map.prototype.moveAllEnemies = function () {
 Map.prototype.updateMap = function () {
   this.matrix.map((a) => {
     a.ref.setAttribute("class", "");
+    a.inside = [""];
   });
   this.entities.map((a) => {
     this.getCell(a.x, a.y).ref.setAttribute("class", a.type);
+    this.getCell(a.x, a.y).inside.pop();
+    this.getCell(a.x, a.y).add(a);
   });
 };
 
+Map.prototype.loop = function (a) {
+  this.overlap();
+  this.updateMap();
+  this.getPlayer().move(a);
+  this.moveAllEnemies();
+  this.updateMap();
+  //this.overlap();
+};
+
+Map.prototype.overlap = function () {
+  for (let i = 0; i < this.entities.length; i++) {
+    for (let j = 0; j < this.entities.length; j++) {
+      if (this.entities[i].id !== this.entities[j].id) {
+        if (
+          this.entities[i].x === this.entities[j].x &&
+          this.entities[i].y === this.entities[j].y
+        ) {
+          if (
+            this.entities[i].type === "wall" &&
+            this.entities[j].type === "wall"
+          ) {
+            this.entities.splice(j, 1);
+          }
+          if (
+            this.entities[i].type === "zombie" &&
+            this.entities[j].type === "soldier"
+          ) {
+            //window.alert("GAME OVER");
+            location.reload();
+          }
+        }
+      }
+    }
+  }
+};
+
+///////
+//GESTION DE CELDA
+//////
 function Cell(x, y, ref) {
   this.x = x;
   this.y = y;
   this.ref = ref;
-  this.inside = [""];
+  this.inside = [];
 }
 
 Cell.prototype.add = function (entity) {
@@ -108,8 +150,7 @@ Cell.prototype.remove = function (id) {
   this.inside.splice(
     this.inside.findIndex((e) => {
       e.id === id;
-    }),
-    1
+    })
   );
 };
 
@@ -138,20 +179,12 @@ function Pawn(x, y, type, id) {
   this.target = [];
 }
 
-Pawn.prototype.show = function () {
-  let a = gameMap.getCell(this.x, this.y);
-  console.log(a);
-};
-
 Pawn.prototype.hide = function () {
-  this.canGo();
-  gameMap.getCell(this.x, this.y).remove(id);
+  gameMap.getCell(this.x, this.y).remove(this.id);
 };
 
 Pawn.prototype.move = function () {
-  //this.hide();
   //console.log("Empty function, define by children");
-  //this.show();
 };
 
 Pawn.prototype.whatAround = function () {
@@ -168,16 +201,16 @@ Pawn.prototype.canGo = function () {
   this.canMove.down = true;
   this.canMove.rigth = true;
   for (let index = 0; index < this.blockedTerrain.length; index++) {
-    if (this.seeAround.up === this.blockedTerrain[index]) {
+    if (this.seeAround.up.type === this.blockedTerrain[index]) {
       this.canMove.up = false;
     }
-    if (this.seeAround.left === this.blockedTerrain[index]) {
+    if (this.seeAround.left.type === this.blockedTerrain[index]) {
       this.canMove.left = false;
     }
-    if (this.seeAround.down === this.blockedTerrain[index]) {
+    if (this.seeAround.down.type === this.blockedTerrain[index]) {
       this.canMove.down = false;
     }
-    if (this.seeAround.rigth === this.blockedTerrain[index]) {
+    if (this.seeAround.rigth.type === this.blockedTerrain[index]) {
       this.canMove.rigth = false;
     }
   }
@@ -192,7 +225,8 @@ Soldier.prototype = Object.create(Pawn.prototype);
 Soldier.prototype.constructor = Soldier;
 
 Soldier.prototype.move = function (keyInput) {
-  this.hide();
+  this.whatAround();
+  this.canGo();
   if (keyInput === "a" && this.canMove.left) {
     this.x--;
   } else if (keyInput === "d" && this.canMove.rigth) {
@@ -202,7 +236,6 @@ Soldier.prototype.move = function (keyInput) {
   } else if (keyInput === "s" && this.canMove.down) {
     this.y++;
   }
-  this.show();
 };
 
 // ZOMBIE
@@ -217,7 +250,8 @@ Zombie.prototype = Object.create(Pawn.prototype);
 Zombie.prototype.constructor = Zombie;
 
 Zombie.prototype.move = function () {
-  //this.hide();
+  this.whatAround();
+  this.canGo();
 
   if (this.go) {
     let a =
@@ -236,7 +270,6 @@ Zombie.prototype.move = function () {
   } else {
     this.go = true;
   }
-  //this.show();
 };
 
 function Wall(x, y, type, id) {
@@ -249,9 +282,23 @@ gameMap.mapGenerator();
 gameMap.putWall();
 gameMap.newPlayer(1, 1);
 gameMap.newEnemy(4, 4);
-
 gameMap.updateMap();
 
+let timerId = setInterval((e) => {
+  gameMap.updateMap();
+}, 333);
+
 window.addEventListener("keydown", (e) => {
-  gameMap.moveAllEnemies();
+  console.log(e.key);
+  if ((e.key === "w") | (e.key === "a") | (e.key === "s") | (e.key === "d")) {
+    gameMap.loop(e.key);
+  }
+  if (
+    (e.key === "ArrowUp") |
+    (e.key === "ArrowLeft") |
+    (e.key === "ArrowDown") |
+    (e.key === "ArrowRight")
+  ) {
+    gameMap.loop(e.key);
+  }
 });
