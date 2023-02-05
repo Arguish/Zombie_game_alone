@@ -1,80 +1,121 @@
-//VARIABLES
+let mapWidth = document.querySelector("#inputRows").valueAsNumber || 10;
+let mapHigth = document.querySelector("#inputCols").valueAsNumber || 10;
+let gameWindow = document.querySelector("#gameWindow");
+let playGameButton = document.querySelector("#playGame");
 
-//FUNCIONES SALVAJES
-function getCell(col, row) {
-  return document.querySelector(`#row${row}>#col${col}`);
-} // INPUT: (x,y) OUTPUT: (Referencia a celda)
+let gameMap;
+////////////////////////
 
-function getCellClass(x, y) {
-  let a = getCell(x, y);
-  return a.getAttribute("class");
-}
-
-///////////////////
-
-function Game() {
-  this.entities = [];
-  this.loop = [];
+function Map(width, height) {
+  this.width = width;
+  this.height = height;
   this.gameOn = false;
+  this.entities = [];
+  this.matrix = [];
 }
 
-Game.prototype.uniqueId = function () {
+Map.prototype.uniqueId = function () {
   return (
     Date().slice(0, 24).replaceAll(":", "").replaceAll(" ", "") +
     Math.random().toString().replace(".", "")
   );
 };
 
-Game.prototype.startGame = function () {
-  this.addPlayer();
-  this.addEnemy(3);
-  this.entities.map((a) => a.show());
-  this.gameOn = true;
-};
-
-Game.prototype.stopLoop = function () {
-  this.gameOn = false;
-};
-
-Game.prototype.runLoop = function (keyInput) {
-  if (this.gameOn) {
-    if (this.entities.length > 0) this.entities.map((b) => b.move(keyInput));
-  }
-};
-
-Game.prototype.addPlayer = function () {
-  if (!this.entities.includes(this.getPlayer())) {
-    this.entities.push(new Soldier(2, 2, "soldier", this.uniqueId()));
-  }
-};
-
-Game.prototype.getPlayer = function () {
-  return this.entities.filter((a) => a.type === "soldier")[0];
-};
-
-Game.prototype.addEnemy = function (num) {
-  for (let index = 0; index < num; index++) {
-    this.entities.push(new Zombie(4 + index, 8, "zombie", this.uniqueId()));
-  }
-};
-
-Game.prototype.overlap = function () {
-  let mapMatrix = [];
-  let b = [];
-  for (let i = 1; i < gameMap.x; i++) {
-    b = [];
-    for (let j = 1; j < gameMap.y; j++) {
-      b.push([getCellClass(i, j)]);
+Map.prototype.mapGenerator = function () {
+  let table = document.createElement("table");
+  table.setAttribute("id", "gameTable");
+  gameWindow.appendChild(table);
+  let tempTr;
+  let tempTd;
+  for (let i = 0; i < this.width; i++) {
+    tempTr = document.createElement("tr");
+    tempTr.setAttribute("id", `row${i}`);
+    for (let j = 0; j < this.height; j++) {
+      tempTd = document.createElement("td");
+      tempTd.setAttribute("id", `col${j}`);
+      tempTr.appendChild(tempTd);
+      this.matrix.push(new Cell(j, i, tempTd));
     }
-    mapMatrix.push(b);
+    table.appendChild(tempTr);
   }
-  console.log(mapMatrix);
-  return mapMatrix;
+};
+
+Map.prototype.clean = function (x, y) {
+  this.getCell(x, y).inside.pop();
+};
+
+Map.prototype.putWall = function () {
+  this.matrix.map((a) => {
+    if (a.x === 0 || a.y === 0) {
+      this.entities.push(new Wall(a.x, a.y, "wall", this.uniqueId()));
+    }
+    if (a.x === this.width - 1 || a.y === this.height - 1) {
+      this.entities.push(new Wall(a.x, a.y, "wall", this.uniqueId()));
+    }
+  });
+};
+
+Map.prototype.getCell = function (x, y) {
+  let a;
+  for (let i = 0; i < this.matrix.length; i++) {
+    if (this.matrix[i].x === x && this.matrix[i].y === y) {
+      a = this.matrix[i];
+    }
+  }
+  return a;
+};
+
+Map.prototype.newPlayer = function (x, y) {
+  this.entities.push(new Soldier(x, y, "soldier", this.uniqueId()));
+};
+
+Map.prototype.getPlayer = function () {
+  return this.entities.find((a) => a.type === "soldier");
+};
+
+Map.prototype.newEnemy = function (x, y) {
+  this.entities.push(new Zombie(x, y, "zombie", this.uniqueId()));
+};
+
+Map.prototype.moveAllEnemies = function () {
+  this.entities.map((a) => {
+    if (a.type === "zombie") {
+      a.move();
+    }
+  });
+};
+
+Map.prototype.updateMap = function () {
+  this.matrix.map((a) => {
+    a.ref.setAttribute("class", "");
+  });
+  this.entities.map((a) => {
+    this.getCell(a.x, a.y).ref.setAttribute("class", a.type);
+  });
+};
+
+function Cell(x, y, ref) {
+  this.x = x;
+  this.y = y;
+  this.ref = ref;
+  this.inside = [""];
+}
+
+Cell.prototype.add = function (entity) {
+  this.inside.push(entity);
+};
+Cell.prototype.remove = function (id) {
+  this.inside.splice(
+    this.inside.findIndex((e) => {
+      e.id === id;
+    }),
+    1
+  );
 };
 
 //////////////////
-
-//OBJETO
+//OBJETO personaje
+///////////////////
 
 function Pawn(x, y, type, id) {
   this.x = x;
@@ -98,31 +139,30 @@ function Pawn(x, y, type, id) {
 }
 
 Pawn.prototype.show = function () {
-  this.canGo();
-  getCell(this.x, this.y).classList.add(this.type);
-  this.whatAround();
+  let a = gameMap.getCell(this.x, this.y);
+  console.log(a);
 };
 
 Pawn.prototype.hide = function () {
   this.canGo();
-  getCell(this.x, this.y).classList.remove(this.type);
-  this.whatAround();
+  gameMap.getCell(this.x, this.y).remove(id);
 };
 
 Pawn.prototype.move = function () {
-  this.hide();
+  //this.hide();
   //console.log("Empty function, define by children");
-  this.show();
+  //this.show();
 };
 
 Pawn.prototype.whatAround = function () {
-  this.seeAround.up = getCellClass(this.x, this.y - 1);
-  this.seeAround.left = getCellClass(this.x - 1, this.y);
-  this.seeAround.down = getCellClass(this.x, this.y + 1);
-  this.seeAround.rigth = getCellClass(this.x + 1, this.y);
+  this.seeAround.up = gameMap.getCell(this.x, this.y - 1).inside[0];
+  this.seeAround.left = gameMap.getCell(this.x - 1, this.y).inside[0];
+  this.seeAround.down = gameMap.getCell(this.x, this.y + 1).inside[0];
+  this.seeAround.rigth = gameMap.getCell(this.x + 1, this.y).inside[0];
 };
 
 Pawn.prototype.canGo = function () {
+  this.whatAround();
   this.canMove.up = true;
   this.canMove.left = true;
   this.canMove.down = true;
@@ -177,26 +217,41 @@ Zombie.prototype = Object.create(Pawn.prototype);
 Zombie.prototype.constructor = Zombie;
 
 Zombie.prototype.move = function () {
-  this.hide();
+  //this.hide();
 
   if (this.go) {
     let a =
-      Math.abs(this.x - newGame.getPlayer().x) <=
-      Math.abs(this.y - newGame.getPlayer().y);
-    if (!a && this.x > newGame.getPlayer().x && this.canMove.left) {
+      Math.abs(this.x - gameMap.getPlayer().x) <=
+      Math.abs(this.y - gameMap.getPlayer().y);
+    if (!a && this.x > gameMap.getPlayer().x && this.canMove.left) {
       this.x--;
-    } else if (!a && this.x < newGame.getPlayer().x && this.canMove.rigth) {
+    } else if (!a && this.x < gameMap.getPlayer().x && this.canMove.rigth) {
       this.x++;
-    } else if (a && this.y > newGame.getPlayer().y && this.canMove.up) {
+    } else if (a && this.y > gameMap.getPlayer().y && this.canMove.up) {
       this.y--;
-    } else if (a && this.y < newGame.getPlayer().y && this.canMove.down) {
+    } else if (a && this.y < gameMap.getPlayer().y && this.canMove.down) {
       this.y++;
     }
     this.go = false;
   } else {
     this.go = true;
   }
-  this.show();
+  //this.show();
 };
 
-//LLAMADAS
+function Wall(x, y, type, id) {
+  Pawn.call(this, x, y, type, id);
+  this.type = "wall";
+}
+
+gameMap = new Map(mapWidth, mapHigth);
+gameMap.mapGenerator();
+gameMap.putWall();
+gameMap.newPlayer(1, 1);
+gameMap.newEnemy(4, 4);
+
+gameMap.updateMap();
+
+window.addEventListener("keydown", (e) => {
+  gameMap.moveAllEnemies();
+});
