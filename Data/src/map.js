@@ -1,4 +1,4 @@
-function Map(width, height) {
+function Map(width = 10, height = 10) {
   this.width = width;
   this.height = height;
   this.gameOn = false;

@@ -1,7 +1,8 @@
-let mapWidth = document.querySelector("#inputRows").valueAsNumber || 10;
-let mapHigth = document.querySelector("#inputCols").valueAsNumber || 10;
+let mapWidth = document.querySelector("#inputRows");
+let mapHigth = document.querySelector("#inputCols");
 let gameWindow = document.querySelector("#gameWindow");
 let playGameButton = document.querySelector("#playGame");
 
 let gameMap;
+let timerId;
 ////////////////////////
