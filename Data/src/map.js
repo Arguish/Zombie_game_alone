@@ -211,6 +211,7 @@ Map.prototype.overlap = function () {
             let tempJ = this.entities[j].id;
             this.searchAndDestroy(tempI);
             this.searchAndDestroy(tempJ);
+            aTrap.play();
           }
           if (
             this.entities[i].type === "trap" &&

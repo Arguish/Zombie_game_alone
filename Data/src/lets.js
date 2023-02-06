@@ -7,6 +7,9 @@ let gameMap;
 let timerId;
 ////////////////////////
 
+let aTrap = new Audio("../assests/sound/trap.wav");
+///////////
+
 function RandomRange(a, b) {
   return Math.floor(Math.random() * (b - a + 1) + a);
 }
