@@ -63,6 +63,7 @@ h1 {
   background-image: url("../assests/images/sword.png");
   background-size: contain;
   background-color: var(--acento3);
+  border-radius: 100%;
 }
 
 .trap {
