@@ -6,3 +6,7 @@ let playGameButton = document.querySelector("#playGame");
 let gameMap;
 let timerId;
 ////////////////////////
+
+function RandomRange(a, b) {
+  return Math.floor(Math.random() * (b - a + 1) + a);
+}

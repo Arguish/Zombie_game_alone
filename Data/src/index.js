@@ -1,11 +1,11 @@
 playGameButton.addEventListener("click", gameStart);
 
 function gameStart() {
-  gameMap = new Map(mapWidth.valueAsNumber, mapHigth.valueAsNumber);
+  gameMap = new Map(20, 20);
   gameMap.mapGenerator();
   gameMap.putWall();
   gameMap.newPlayer(1, 1);
-  gameMap.newEnemy(4, 4);
+  gameMap.spawnGrave(1);
   gameMap.updateMap();
   timerId = setInterval((e) => {
     gameMap.updateMap();
@@ -13,7 +13,7 @@ function gameStart() {
   window.addEventListener("keydown", (e) => {
     console.log(e.key);
     if ((e.key === "w") | (e.key === "a") | (e.key === "s") | (e.key === "d")) {
-      gameMap.loop(e.key);
+      gameMap.loop(e.key, false);
     }
     if (
       (e.key === "ArrowUp") |
@@ -21,7 +21,7 @@ function gameStart() {
       (e.key === "ArrowDown") |
       (e.key === "ArrowRight")
     ) {
-      gameMap.loop(e.key);
+      gameMap.loop(e.key, true);
     }
   });
 }

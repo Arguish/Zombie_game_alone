@@ -58,3 +58,32 @@ h1 {
   background-size: contain;
   background-color: var(--gris);
 }
+
+.sword {
+  background-image: url("../assests/images/sword.png");
+  background-size: contain;
+  background-color: var(--acento3);
+}
+
+.trap {
+  background-image: url("../assests/images/trap.png");
+  background-size: contain;
+  background-color: var(--acento3);
+}
+
+.spawn {
+  background-image: url("../assests/images/spawn.png");
+  background-size: contain;
+  background-color: var(--acento1);
+}
+
+.clang {
+  background-image: url("../assests/images/explosion.png");
+  background-size: contain;
+  background-color: var(--acento3);
+}
+.boom {
+  background-image: url("../assests/images/dead.png");
+  background-size: contain;
+  background-color: rgba(0, 0, 0, 0);
+}

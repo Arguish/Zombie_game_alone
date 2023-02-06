@@ -1,7 +1,7 @@
 // Soldado
 function Soldier(x, y, type, id) {
   Pawn.call(this, x, y, type, id);
-  this.blockedTerrain = ["wall", "zombie"];
+  this.blockedTerrain = ["wall", "zombie", "trap"];
 }
 Soldier.prototype = Object.create(Pawn.prototype);
 Soldier.prototype.constructor = Soldier;

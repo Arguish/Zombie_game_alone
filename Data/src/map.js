@@ -4,6 +4,7 @@ function Map(width = 10, height = 10) {
   this.gameOn = false;
   this.entities = [];
   this.matrix = [];
+  this.bloodMoon = 0;
 }
 
 Map.prototype.uniqueId = function () {
@@ -77,6 +78,80 @@ Map.prototype.moveAllEnemies = function () {
   });
 };
 
+Map.prototype.shoot = function (keyInput, shootSword = false) {
+  let spawnPoint = { x: 0, y: 0 };
+  let direction = { x: 0, y: 0 };
+  if (keyInput === "ArrowUp") {
+    direction = { x: 0, y: -1 };
+    spawnPoint.x = this.getPlayer().x;
+    spawnPoint.y = this.getPlayer().y - 1;
+  } else if (keyInput === "ArrowLeft") {
+    direction = { x: -1, y: 0 };
+    spawnPoint.x = this.getPlayer().x - 1;
+    spawnPoint.y = this.getPlayer().y;
+  } else if (keyInput === "ArrowDown") {
+    direction = { x: 0, y: 1 };
+    spawnPoint.x = this.getPlayer().x;
+    spawnPoint.y = this.getPlayer().y + 1;
+  } else if (keyInput === "ArrowRight") {
+    direction = { x: 1, y: 0 };
+    spawnPoint.x = this.getPlayer().x + 1;
+    spawnPoint.y = this.getPlayer().y;
+  }
+  if (shootSword) {
+    this.entities.push(
+      new Sword(
+        spawnPoint.x,
+        spawnPoint.y,
+        "sword",
+        this.uniqueId(),
+        direction.x,
+        direction.y
+      )
+    );
+  }
+};
+
+Map.prototype.moveProyectiles = function (shooting) {
+  if (!shooting) {
+    this.entities.map((a) => {
+      if (a.type === "sword") {
+        a.move();
+      }
+    });
+  }
+};
+
+Map.prototype.landTrap = function (x, y) {
+  this.entities.push(new Trap(x, y, "trap", this.uniqueId()));
+};
+
+Map.prototype.spawnGrave = function (num) {
+  for (let index = 0; index < num; index++) {
+    this.entities.push(
+      new Spawn(
+        RandomRange(1, 19),
+        RandomRange(1, 19),
+        "spawn",
+        this.uniqueId()
+      )
+    );
+  }
+};
+
+Map.prototype.spawnEnemy = function () {
+  if (this.bloodMoon <= 0) {
+    this.entities.map((a) => {
+      if (a.type === "spawn") {
+        this.newEnemy(a.x, a.y);
+      }
+    });
+    this.bloodMoon = 20;
+  } else {
+    this.bloodMoon--;
+  }
+};
+
 Map.prototype.updateMap = function () {
   this.matrix.map((a) => {
     a.ref.setAttribute("class", "");
@@ -89,13 +164,9 @@ Map.prototype.updateMap = function () {
   });
 };
 
-Map.prototype.loop = function (a) {
-  this.overlap();
-  this.updateMap();
-  this.getPlayer().move(a);
-  this.moveAllEnemies();
-  this.updateMap();
-  //this.overlap();
+Map.prototype.searchAndDestroy = function (id) {
+  let num = this.entities.findIndex((a) => a.id === id);
+  this.entities.splice(num, 1);
 };
 
 Map.prototype.overlap = function () {
@@ -110,7 +181,7 @@ Map.prototype.overlap = function () {
             this.entities[i].type === "wall" &&
             this.entities[j].type === "wall"
           ) {
-            this.entities.splice(j, 1);
+            this.searchAndDestroy(this.entities[j].id);
           }
           if (
             this.entities[i].type === "zombie" &&
@@ -119,8 +190,51 @@ Map.prototype.overlap = function () {
             //window.alert("GAME OVER");
             location.reload();
           }
+          if (
+            this.entities[i].type === "sword" &&
+            this.entities[j].type === "zombie"
+          ) {
+            this.searchAndDestroy(this.entities[j].id);
+          }
+          if (
+            this.entities[i].type === "wall" &&
+            this.entities[j].type === "sword"
+          ) {
+            this.searchAndDestroy(this.entities[j].id);
+          }
+          if (
+            this.entities[i].type === "sword" &&
+            this.entities[j].type === "sword"
+          ) {
+            this.landTrap(this.entities[i].x, this.entities[i].y);
+            let tempI = this.entities[i].id;
+            let tempJ = this.entities[j].id;
+            this.searchAndDestroy(tempI);
+            this.searchAndDestroy(tempJ);
+          }
+          if (
+            this.entities[i].type === "trap" &&
+            this.entities[j].type === "zombie"
+          ) {
+            let tempI = this.entities[i].id;
+            let tempJ = this.entities[j].id;
+            this.searchAndDestroy(tempI);
+            this.searchAndDestroy(tempJ);
+          }
         }
       }
     }
   }
+};
+
+Map.prototype.loop = function (a, b) {
+  this.overlap();
+  this.updateMap();
+  this.shoot(a, b);
+  this.moveProyectiles(b);
+  this.getPlayer().move(a);
+  this.spawnEnemy();
+  this.moveAllEnemies();
+  this.updateMap();
+  //this.overlap();
 };
