@@ -1,15 +1,15 @@
 // ZOMBIE
-function Zombie(x, y, type, id) {
+function Hunter(x, y, type, id) {
   Pawn.call(this, x, y, type, id);
   this.go = true;
-  this.blockedTerrain = ["zombie", "wall"];
+  this.blockedTerrain = ["hunter", "vagabond", "wall"];
   this.target = ["soldier"];
 }
 
-Zombie.prototype = Object.create(Pawn.prototype);
-Zombie.prototype.constructor = Zombie;
+Hunter.prototype = Object.create(Pawn.prototype);
+Hunter.prototype.constructor = Hunter;
 
-Zombie.prototype.move = function () {
+Hunter.prototype.move = function () {
   this.whatAround();
   this.canGo();
 

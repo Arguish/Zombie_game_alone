@@ -42,10 +42,15 @@ h1 {
   border-radius: 100%;
 }
 
-.zombie {
-  background-image: url("../assests/images/zombie.png");
+.hunter {
+  background-image: url("../assests/images/hunter.jpeg");
   background-size: contain;
-  background-color: var(--verde);
+  border-radius: 100%;
+}
+
+.vagabond {
+  background-image: url("../assests/images/vagabond.jpeg");
+  background-size: contain;
   border-radius: 100%;
 }
 
