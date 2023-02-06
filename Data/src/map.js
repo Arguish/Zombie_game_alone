@@ -143,6 +143,7 @@ Map.prototype.spawnEnemy = function () {
   if (this.bloodMoon <= 0) {
     this.entities.map((a) => {
       if (a.type === "spawn") {
+        aSpawn.play();
         this.newEnemy(a.x, a.y);
       }
     });
@@ -187,7 +188,8 @@ Map.prototype.overlap = function () {
             this.entities[i].type === "zombie" &&
             this.entities[j].type === "soldier"
           ) {
-            //window.alert("GAME OVER");
+            aDie.play();
+            window.alert("GAME OVER");
             location.reload();
           }
           if (
@@ -217,6 +219,7 @@ Map.prototype.overlap = function () {
             this.entities[i].type === "trap" &&
             this.entities[j].type === "zombie"
           ) {
+            aHit.play();
             let tempI = this.entities[i].id;
             let tempJ = this.entities[j].id;
             this.searchAndDestroy(tempI);
@@ -229,6 +232,7 @@ Map.prototype.overlap = function () {
 };
 
 Map.prototype.loop = function (a, b) {
+  aStep.play();
   this.overlap();
   this.updateMap();
   this.shoot(a, b);

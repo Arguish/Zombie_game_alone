@@ -1,6 +1,9 @@
 playGameButton.addEventListener("click", gameStart);
+mainMusic.play();
 
 function gameStart() {
+  mainMusic.pause();
+  loopMusic.play();
   gameMap = new Map(20, 20);
   gameMap.mapGenerator();
   gameMap.putWall();
