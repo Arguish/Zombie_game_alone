@@ -67,12 +67,18 @@ Map.prototype.getPlayer = function () {
 };
 
 Map.prototype.newEnemy = function (x, y) {
-  this.entities.push(new Zombie(x, y, "zombie", this.uniqueId()));
+  let a = RandomRange(1, 4);
+  if (a === 1) {
+    this.entities.push(new Hunter(x, y, "hunter", this.uniqueId()));
+  }
+  if (a > 1) {
+    this.entities.push(new Vagabond(x, y, "vagabond", this.uniqueId()));
+  }
 };
 
 Map.prototype.moveAllEnemies = function () {
   this.entities.map((a) => {
-    if (a.type === "zombie") {
+    if (a.type === "hunter" || a.type === "vagabond") {
       a.move();
     }
   });
@@ -130,8 +136,8 @@ Map.prototype.spawnGrave = function (num) {
   for (let index = 0; index < num; index++) {
     this.entities.push(
       new Spawn(
-        RandomRange(1, 19),
-        RandomRange(1, 19),
+        RandomRange(1, 18),
+        RandomRange(1, 18),
         "spawn",
         this.uniqueId()
       )
@@ -185,7 +191,7 @@ Map.prototype.overlap = function () {
             this.searchAndDestroy(this.entities[j].id);
           }
           if (
-            this.entities[i].type === "zombie" &&
+            this.entities[i].type === "vagabond" &&
             this.entities[j].type === "soldier"
           ) {
             aDie.play();
@@ -194,7 +200,7 @@ Map.prototype.overlap = function () {
           }
           if (
             this.entities[i].type === "sword" &&
-            this.entities[j].type === "zombie"
+            this.entities[j].type === "vagabond"
           ) {
             this.searchAndDestroy(this.entities[j].id);
           }
@@ -217,7 +223,8 @@ Map.prototype.overlap = function () {
           }
           if (
             this.entities[i].type === "trap" &&
-            this.entities[j].type === "zombie"
+            (this.entities[j].type === "vagabond" ||
+              this.entities[j].type === "hunter")
           ) {
             aHit.play();
             let tempI = this.entities[i].id;
